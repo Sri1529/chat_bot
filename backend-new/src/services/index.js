@@ -8,28 +8,35 @@ let services = {};
 
 async function initializeServices() {
   try {
+    // Initialize Redis with fallback
     console.log('🔧 Initializing Redis service...');
-    await redisService.initialize();
-    services.redis = redisService; // Store the service module, not just the initialized result
-    console.log('✅ Redis service initialized');
+    try {
+      await redisService.initialize();
+      services.redis = redisService;
+      console.log('✅ Redis service initialized');
+    } catch (redisError) {
+      console.warn('⚠️ Redis service failed to initialize:', redisError.message);
+      console.warn('⚠️ Continuing without Redis - sessions will not persist');
+      services.redis = null;
+    }
 
     console.log('🔧 Initializing Pinecone service...');
-    services.pinecone = pineconeService; // Store the service module, not just the initialized result
+    services.pinecone = pineconeService;
     await pineconeService.initialize();
     console.log('✅ Pinecone service initialized');
 
     console.log('🔧 Initializing Gemini service...');
-    services.gemini = geminiService; // Store the service module, not just the initialized result
+    services.gemini = geminiService;
     await geminiService.initialize();
     console.log('✅ Gemini service initialized');
 
     console.log('🔧 Initializing Pinecone embeddings service...');
-    services.pineconeEmbeddings = pineconeEmbeddingsService; // Store the service module, not just the initialized result
+    services.pineconeEmbeddings = pineconeEmbeddingsService;
     await pineconeEmbeddingsService.initialize();
     console.log('✅ Pinecone embeddings service initialized');
 
     console.log('🔧 Initializing News service...');
-    services.news = newsService; // Store the service module, not just the initialized result
+    services.news = newsService;
     await newsService.initialize();
     console.log('✅ News service initialized');
 
@@ -45,7 +52,7 @@ async function initializeServices() {
 }
 
 function getServices() {
-  if (!services.redis || !services.pinecone || !services.gemini || !services.pineconeEmbeddings) {
+  if (!services.pinecone || !services.gemini || !services.pineconeEmbeddings) {
     throw new Error('Services not initialized. Call initializeServices() first.');
   }
   return services;

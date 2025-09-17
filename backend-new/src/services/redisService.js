@@ -5,21 +5,29 @@ let client = null;
 
 async function initialize() {
   try {
-    const redisConfig = {
-      socket: {
-        host: config.redis.host,
-        port: config.redis.port,
-        reconnectStrategy: (retries) => Math.min(retries * 50, 1000)
-      }
-    };
-
-    if (config.redis.password) {
-      redisConfig.password = config.redis.password;
-    }
-
+    // Use REDIS_URL if available (production), otherwise use individual config
     if (config.redis.url) {
-      client = createClient({ url: config.redis.url });
+      console.log('Connecting to Redis using URL:', config.redis.url.replace(/\/\/.*@/, '//***:***@')); // Hide credentials in logs
+      client = createClient({ 
+        url: config.redis.url,
+        socket: {
+          reconnectStrategy: (retries) => Math.min(retries * 50, 1000)
+        }
+      });
     } else {
+      console.log(`Connecting to Redis at ${config.redis.host}:${config.redis.port}`);
+      const redisConfig = {
+        socket: {
+          host: config.redis.host,
+          port: config.redis.port,
+          reconnectStrategy: (retries) => Math.min(retries * 50, 1000)
+        }
+      };
+
+      if (config.redis.password) {
+        redisConfig.password = config.redis.password;
+      }
+
       client = createClient(redisConfig);
     }
 
@@ -40,9 +48,10 @@ async function initialize() {
     });
 
     await client.connect();
+    console.log('✅ Redis service initialized successfully');
     return client;
   } catch (error) {
-    console.error('Failed to initialize Redis:', error);
+    console.error('❌ Failed to initialize Redis:', error);
     throw error;
   }
 }

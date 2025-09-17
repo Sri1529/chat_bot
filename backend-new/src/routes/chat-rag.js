@@ -46,7 +46,7 @@ router.post('/', [
     
     console.log(`Processing RAG chat message for session: ${currentSessionId}`);
     
-    // Add user message to session
+    // Add user message to session (if Redis is available)
     const userMessage = {
       id: uuidv4(),
       text: message,
@@ -54,7 +54,11 @@ router.post('/', [
       timestamp: new Date().toISOString()
     };
     
-    await services.redis.addMessageToSession(currentSessionId, userMessage);
+    if (services.redis) {
+      await services.redis.addMessageToSession(currentSessionId, userMessage);
+    } else {
+      console.warn('⚠️ Redis not available - session not persisted');
+    }
     
     // Generate query embedding
     console.log('🔍 Generating query embedding...');
@@ -85,8 +89,8 @@ router.post('/', [
       // Continue without context
     }
     
-    // Get chat history for context
-    const chatHistory = await services.redis.getSessionHistory(currentSessionId);
+    // Get chat history for context (if Redis is available)
+    const chatHistory = services.redis ? await services.redis.getSessionHistory(currentSessionId) : [];
     const recentHistory = chatHistory.slice(-6); // Last 3 exchanges
     
     // Build conversation context
@@ -135,7 +139,10 @@ ${conversationContext}
       }
     };
     
-    await services.redis.addMessageToSession(currentSessionId, aiMessage);
+    // Store AI response in session (if Redis is available)
+    if (services.redis) {
+      await services.redis.addMessageToSession(currentSessionId, aiMessage);
+    }
     
     // Return response
     res.json({
@@ -173,7 +180,7 @@ router.get('/history/:sessionId', [
     const { sessionId } = req.params;
     const services = getServices();
     
-    const messages = await services.redis.getSessionHistory(sessionId);
+    const messages = services.redis ? await services.redis.getSessionHistory(sessionId) : [];
     
     res.json({
       success: true,
@@ -201,7 +208,9 @@ router.delete('/reset/:sessionId', [
     const { sessionId } = req.params;
     const services = getServices();
     
-    await services.redis.clearSession(sessionId);
+    if (services.redis) {
+      await services.redis.clearSession(sessionId);
+    }
     
     res.json({
       success: true,

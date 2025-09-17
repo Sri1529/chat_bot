@@ -3,9 +3,10 @@ services:
     name: voicebot-backend
     env: node
     plan: starter
+    nodeVersion: 20
     buildCommand: npm install
     startCommand: npm start
-    healthCheckPath: /api/health/live
+    healthCheckPath: /api/health
     envVars:
       - key: NODE_ENV
         value: production
@@ -21,14 +22,32 @@ services:
         value: us-east-1-aws
       - key: PINECONE_INDEX_NAME
         value: voicebot-index
+      - key: PINECONE_DIMENSION
+        value: 1024
       - key: GEMINI_API_KEY
         sync: false
       - key: GEMINI_MODEL
         value: gemini-1.5-flash
-      - key: JINA_API_KEY
+      - key: GEMINI_MAX_TOKENS
+        value: 1000
+      - key: GEMINI_TEMPERATURE
+        value: 0.7
+      - key: OPENAI_API_KEY
         sync: false
-      - key: JINA_MODEL
-        value: jina-embeddings-v2-base-en
+      - key: RAG_TOP_K
+        value: 5
+      - key: RAG_CHUNK_SIZE
+        value: 1000
+      - key: RAG_CHUNK_OVERLAP
+        value: 200
+      - key: SESSION_TTL
+        value: 3600
+      - key: SESSION_MAX_MESSAGES
+        value: 100
+      - key: NEWS_MAX_ARTICLES
+        value: 50
+      - key: NEWS_UPDATE_INTERVAL
+        value: 3600000
 
 databases:
   - name: voicebot-redis

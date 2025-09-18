@@ -1,323 +1,612 @@
-# VoiceBot - AI-Powered Voice Chatbot with RAG Pipeline
+# VoiceBot - AI-Powered Chatbot with RAG Pipeline
 
-A modern, full-stack voice chatbot application with Retrieval-Augmented Generation (RAG) pipeline, built with Node.js, React, Pinecone, and Gemini AI.
+A complete AI chatbot application built with React frontend and Node.js backend, featuring Retrieval Augmented Generation (RAG) using Pinecone vector database, Google Gemini AI, and Redis for session management.
 
-## 🚀 Project Overview
-
-This project migrates and rebuilds a voice bot application from Python Flask to a modern Node.js + Express backend with the following key improvements:
-
-- **Backend**: Node.js + Express with REST API
-- **Frontend**: React with streaming responses
-- **Vector Database**: Pinecone (replacing AWS S3)
-- **LLM**: Google Gemini AI (replacing OpenAI)
-- **Session Storage**: Redis for chat history
-- **RAG Pipeline**: News article ingestion with Jina embeddings
-- **Deployment**: Docker + cloud platforms
-
-## 📋 Features
-
-### Backend Features
-- ✅ REST API with session-based chat management
-- ✅ Pinecone vector database integration
-- ✅ Gemini AI for natural language processing
-- ✅ Redis for session storage and chat history
-- ✅ Jina embeddings for text vectorization
-- ✅ News article ingestion from RSS feeds
-- ✅ Streaming responses for real-time chat
-- ✅ Health checks and monitoring
-- ✅ Docker support
-
-### Frontend Features
-- ✅ Modern React interface with Tailwind CSS
-- ✅ Real-time streaming responses
-- ✅ Voice recording capabilities
-- ✅ Text-to-speech for bot responses
-- ✅ Session management with chat history
-- ✅ Responsive design
-- ✅ Error handling and loading states
-
-### RAG Pipeline
-- ✅ Ingests ~50 news articles from RSS feeds
-- ✅ Generates embeddings using Jina AI
-- ✅ Stores vectors in Pinecone
-- ✅ Retrieves relevant context for user queries
-- ✅ Passes context + query to Gemini for final answer
-
-## 🏗️ Architecture
+## 🏗️ Architecture Overview
 
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   React Frontend│    │  Node.js Backend│    │   Pinecone DB   │
+│   React Frontend │    │  Node.js Backend │    │   External APIs │
 │                 │    │                 │    │                 │
-│  - Chat UI      │◄──►│  - Express API  │◄──►│  - Vector Store │
-│  - Voice Rec    │    │  - Redis Cache  │    │  - Similarity   │
-│  - TTS          │    │  - RAG Pipeline │    │    Search       │
+│ • Chat Interface │◄──►│ • Express Server │◄──►│ • Google Gemini │
+│ • Session Mgmt   │    │ • RAG Pipeline  │    │ • OpenAI API    │
+│ • Sample Q's     │    │ • Redis Cache   │    │ • Pinecone DB   │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
-                                │
-                                ▼
-                       ┌─────────────────┐
-                       │   External APIs │
-                       │                 │
-                       │  - Gemini AI    │
-                       │  - Jina Embed   │
-                       │  - RSS Feeds    │
-                       └─────────────────┘
 ```
 
-## 🛠️ Tech Stack
-
-### Backend
-- **Runtime**: Node.js 18+
-- **Framework**: Express.js
-- **Database**: Redis (sessions)
-- **Vector DB**: Pinecone
-- **AI/LLM**: Google Gemini
-- **Embeddings**: Jina AI
-- **Validation**: express-validator
-- **Security**: Helmet, CORS, Rate limiting
-
-### Frontend
-- **Framework**: React 18
-- **Styling**: Tailwind CSS
-- **Icons**: Lucide React
-- **Audio**: Web Audio API
-- **Build**: Create React App
-
-### Infrastructure
-- **Containerization**: Docker
-- **Orchestration**: Docker Compose
-- **Deployment**: Render, Railway, Netlify, Vercel
-- **Monitoring**: Health checks, logging
-
-## 📦 Quick Start
+## 🚀 Quick Start
 
 ### Prerequisites
+- Node.js 20+
+- Docker & Docker Compose
+- API Keys: Pinecone, Google Gemini, OpenAI
 
-- Node.js 18+
-- Docker (optional)
-- API Keys:
-  - Pinecone API key
-  - Google Gemini API key
-  - Jina AI API key
+### 1. Clone and Setup
+```bash
+git clone <your-repo>
+cd voicebot-main
+```
 
-### Option 1: Docker Compose (Recommended)
-
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd voicebot-main
-   ```
-
-2. **Set up environment variables**
-   ```bash
-   cp env.docker .env
-   # Edit .env with your API keys
-   ```
-
-3. **Start all services**
-   ```bash
-   docker-compose up -d
-   ```
-
-4. **Access the application**
-   - Frontend: http://localhost:3001
-   - Backend API: http://localhost:3000
-   - API Docs: http://localhost:3000/api/health
-
-### Option 2: Local Development
-
-1. **Start Redis**
-   ```bash
-   docker run -d -p 6379:6379 redis:alpine
-   ```
-
-2. **Set up Backend**
-   ```bash
-   cd backend-new
-   cp env.example .env
-   # Edit .env with your API keys
-   npm install
-   npm run seed  # Optional: seed news articles
-   npm run dev
-   ```
-
-3. **Set up Frontend**
-   ```bash
-   cd frontend-new
-   echo "REACT_APP_API_URL=http://localhost:3000/api" > .env
-   npm install
-   npm start
-   ```
-
-## 🔧 Configuration
-
-### Required API Keys
-
-1. **Pinecone** (Vector Database)
-   - Sign up at [pinecone.io](https://pinecone.io)
-   - Create an index with 768 dimensions
-   - Get your API key
-
-2. **Google Gemini** (LLM)
-   - Sign up at [Google AI Studio](https://aistudio.google.com)
-   - Get your API key
-   - Free tier available
-
-3. **Jina AI** (Embeddings)
-   - Sign up at [jina.ai](https://jina.ai)
-   - Get your API key
-   - Free tier available
-
-### Environment Variables
-
-Create `.env` files in both `backend-new/` and `frontend-new/` directories:
-
-**Backend (.env)**
-```env
+### 2. Environment Configuration
+Create `.env` file in project root:
+```bash
+# Pinecone Configuration
 PINECONE_API_KEY=your_pinecone_api_key
+PINECONE_ENVIRONMENT=us-east-1-aws
+PINECONE_INDEX_NAME=voicebot-index
+PINECONE_DIMENSION=1024
+
+# Google Gemini Configuration
 GEMINI_API_KEY=your_gemini_api_key
-JINA_API_KEY=your_jina_api_key
-REDIS_HOST=localhost
-REDIS_PORT=6379
+GEMINI_MODEL=gemini-1.5-flash
+GEMINI_MAX_TOKENS=1000
+GEMINI_TEMPERATURE=0.7
+
+# OpenAI Configuration (for embeddings)
+OPENAI_API_KEY=your_openai_api_key
+
+# Redis Configuration
+REDIS_URL=redis://localhost:6379/0
+
+# RAG Configuration
+RAG_TOP_K=5
+RAG_CHUNK_SIZE=1000
+RAG_CHUNK_OVERLAP=200
+
+# Session Configuration
+SESSION_TTL=3600
+SESSION_MAX_MESSAGES=100
+
+# News Configuration
+NEWS_MAX_ARTICLES=50
+NEWS_UPDATE_INTERVAL=3600000
 ```
 
-**Frontend (.env)**
-```env
-REACT_APP_API_URL=http://localhost:3000/api
-```
-
-## 📊 API Endpoints
-
-### Chat Endpoints
-- `POST /api/chat` - Send a new chat message
-- `GET /api/chat/history/:sessionId` - Get chat history
-- `DELETE /api/chat/reset/:sessionId` - Clear chat history
-- `POST /api/chat/stream` - Streaming chat responses
-
-### Health Endpoints
-- `GET /api/health` - Comprehensive health check
-- `GET /api/health/ready` - Readiness probe
-- `GET /api/health/live` - Liveness probe
-
-## 🚀 Deployment
-
-### Render.com (Backend)
-
-1. Connect your repository to Render
-2. Create a new Web Service
-3. Set environment variables
-4. Deploy using `render.yaml`
-
-### Netlify/Vercel (Frontend)
-
-1. Connect your repository
-2. Set build settings
-3. Set environment variables
-4. Deploy automatically
-
-### Docker
-
+### 3. Run with Docker Compose
 ```bash
-# Build and run with Docker Compose
-docker-compose up -d
+# Build and start all services
+docker-compose up --build
 
-# Or build individual services
-docker build -t voicebot-backend ./backend-new
-docker build -t voicebot-frontend ./frontend-new
+# Or use the convenience script
+chmod +x run-voicebot.sh
+./run-voicebot.sh
 ```
 
-## 🧪 Testing
+### 4. Access the Application
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:3001
+- Health Check: http://localhost:3001/api/health
 
-### Backend Testing
+## 📋 Project Flow - Step by Step
+
+### Phase 1: Application Startup
+
+#### 1.1 Backend Initialization
+```javascript
+// backend-new/src/app.js
+const express = require('express');
+const { initializeServices } = require('./services');
+
+async function startServer() {
+  // Initialize all services
+  await initializeServices();
+  
+  // Start Express server
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+  });
+}
+```
+
+**What happens:**
+1. **Service Initialization**: All services (Redis, Pinecone, Gemini, OpenAI) are initialized
+2. **Database Connection**: Pinecone vector database connection established
+3. **AI Service Setup**: Gemini and OpenAI clients configured
+4. **Redis Connection**: Session storage system initialized (with fallback)
+5. **Express Server**: REST API endpoints registered and server started
+
+#### 1.2 Frontend Initialization
+```javascript
+// frontend-new/src/App.js
+function App() {
+  const { 
+    chatHistory, 
+    sendMessage, 
+    clearChatHistory,
+    sessionId 
+  } = useChat();
+
+  // Load existing session from localStorage
+  useEffect(() => {
+    loadChatHistory();
+  }, []);
+}
+```
+
+**What happens:**
+1. **React App Mounts**: Main application component renders
+2. **Chat Hook Initialization**: Custom hook sets up chat functionality
+3. **Session Recovery**: Existing session loaded from localStorage
+4. **UI Rendering**: Chat interface, sample questions, and controls displayed
+
+### Phase 2: Data Ingestion (RAG Pipeline)
+
+#### 2.1 News Article Ingestion
 ```bash
-cd backend-new
-npm test
+# Trigger news ingestion
+curl -X POST http://localhost:3001/api/news/ingest
 ```
 
-### Frontend Testing
+**Step-by-step process:**
+1. **RSS Feed Parsing**: System fetches news from configured RSS feeds
+2. **Content Extraction**: Uses Cheerio to extract article text
+3. **Text Chunking**: Articles split into manageable chunks (1000 chars with 200 overlap)
+4. **Embedding Generation**: OpenAI API creates vector embeddings for each chunk
+5. **Vector Storage**: Embeddings stored in Pinecone with metadata
+
+```javascript
+// Example embedding process
+const chunks = chunkText(articleContent, 1000, 200);
+for (const chunk of chunks) {
+  const embedding = await openai.embeddings.create({
+    model: "text-embedding-3-small",
+    input: chunk.text
+  });
+  
+  await pinecone.upsert([{
+    id: generateId(),
+    values: embedding.data[0].embedding,
+    metadata: {
+      text: chunk.text,
+      source: article.url,
+      title: article.title,
+      publishedAt: article.publishedAt
+    }
+  }]);
+}
+```
+
+### Phase 3: Chat Interaction Flow
+
+#### 3.1 User Sends Message
+```javascript
+// Frontend: User types message and clicks send
+const handleSendMessage = async (message) => {
+  setLoading(true);
+  try {
+    await sendMessage(message);
+  } finally {
+    setLoading(false);
+  }
+};
+```
+
+#### 3.2 Backend Processing
+```javascript
+// backend-new/src/routes/chat-rag.js
+router.post('/', async (req, res) => {
+  const { message, sessionId } = req.body;
+  
+  // 1. Store user message in session
+  if (services.redis) {
+    await services.redis.addMessageToSession(sessionId, userMessage);
+  }
+  
+  // 2. Generate embedding for user query
+  const queryEmbedding = await services.pineconeEmbeddings.generateEmbedding(message);
+  
+  // 3. Search Pinecone for relevant chunks
+  const searchResults = await services.pinecone.query({
+    vector: queryEmbedding,
+    topK: 5,
+    includeMetadata: true
+  });
+  
+  // 4. Build context from retrieved chunks
+  const context = searchResults.matches.map(match => match.metadata.text).join('\n\n');
+  
+  // 5. Generate response using Gemini
+  const response = await services.gemini.generateResponse(message, context, chatHistory);
+  
+  // 6. Store AI response in session
+  if (services.redis) {
+    await services.redis.addMessageToSession(sessionId, aiMessage);
+  }
+  
+  res.json({ response, sessionId });
+});
+```
+
+#### 3.3 RAG Pipeline Detailed Flow
+
+**Step 1: Query Embedding**
+```javascript
+// Convert user query to vector
+const queryEmbedding = await openai.embeddings.create({
+  model: "text-embedding-3-small",
+  input: userQuery
+});
+```
+
+**Step 2: Vector Search**
+```javascript
+// Search Pinecone for similar content
+const searchResults = await pinecone.query({
+  vector: queryEmbedding.data[0].embedding,
+  topK: 5,
+  includeMetadata: true,
+  filter: { /* optional filters */ }
+});
+```
+
+**Step 3: Context Building**
+```javascript
+// Combine retrieved chunks into context
+const context = searchResults.matches
+  .map(match => `Source: ${match.metadata.title}\n${match.metadata.text}`)
+  .join('\n\n---\n\n');
+```
+
+**Step 4: LLM Generation**
+```javascript
+// Generate response using Gemini with context
+const prompt = `
+Context from knowledge base:
+${context}
+
+User Question: ${userQuery}
+
+Previous conversation:
+${chatHistory}
+
+Please provide a helpful response based on the context above.
+`;
+
+const response = await gemini.generateContent(prompt);
+```
+
+### Phase 4: Session Management
+
+#### 4.1 Redis Session Storage
+```javascript
+// backend-new/src/services/redisService.js
+async function addMessageToSession(sessionId, message) {
+  const key = `session:${sessionId}`;
+  await client.lPush(key, JSON.stringify(message));
+  await client.expire(key, SESSION_TTL); // 1 hour TTL
+}
+```
+
+**Session Structure:**
+```json
+{
+  "sessionId": "uuid-here",
+  "messages": [
+    {
+      "role": "user",
+      "content": "What is AI?",
+      "timestamp": "2024-01-01T10:00:00Z"
+    },
+    {
+      "role": "assistant", 
+      "content": "AI is...",
+      "timestamp": "2024-01-01T10:00:01Z"
+    }
+  ],
+  "ttl": 3600
+}
+```
+
+#### 4.2 Frontend Session Persistence
+```javascript
+// frontend-new/src/hooks/useChat.js
+const [sessionId, setSessionId] = useState(() => {
+  return localStorage.getItem('chatSessionId') || generateSessionId();
+});
+
+// Persist session ID
+useEffect(() => {
+  localStorage.setItem('chatSessionId', sessionId);
+}, [sessionId]);
+```
+
+### Phase 5: API Endpoints
+
+#### 5.1 Chat Endpoints
 ```bash
-cd frontend-new
-npm test
+# Send message
+curl -X POST http://localhost:3001/api/chat \
+  -H "Content-Type: application/json" \
+  -d '{"message": "What is artificial intelligence?", "sessionId": "your-session-id"}'
+
+# Get chat history
+curl http://localhost:3001/api/chat/history/your-session-id
+
+# Clear chat history
+curl -X DELETE http://localhost:3001/api/chat/reset/your-session-id
 ```
 
-### Integration Testing
+#### 5.2 News Management Endpoints
 ```bash
-# Test the full stack
-docker-compose up -d
-# Run your integration tests
+# Ingest news articles
+curl -X POST http://localhost:3001/api/news/ingest
+
+# Get ingestion status
+curl http://localhost:3001/api/news/status
+
+# Get available news sources
+curl http://localhost:3001/api/news/sources
 ```
 
-## 📈 Monitoring
+#### 5.3 Health Check
+```bash
+# Check system health
+curl http://localhost:3001/api/health
+```
 
-### Health Checks
-- Backend: `GET /api/health`
-- Frontend: Built-in error boundaries
-- Docker: Health check containers
+## 🔧 Configuration Details
 
-### Logging
-- Backend: Structured logging with timestamps
-- Frontend: Console logging for development
-- Docker: Container logs
+### API Keys Usage
 
-## 🔄 Migration Notes
+#### Pinecone API Key
+- **Purpose**: Vector database operations
+- **Usage**: Storing and querying document embeddings
+- **Configuration**: Set in `PINECONE_API_KEY` environment variable
 
-### From Python Flask to Node.js Express
+#### Google Gemini API Key
+- **Purpose**: Large Language Model for generating responses
+- **Usage**: Processing user queries with context from RAG
+- **Configuration**: Set in `GEMINI_API_KEY` environment variable
 
-**What Changed:**
-- ✅ Backend framework: Flask → Express.js
-- ✅ Vector DB: AWS S3 → Pinecone
-- ✅ LLM: OpenAI → Gemini AI
-- ✅ Session storage: In-memory → Redis
-- ✅ Embeddings: AWS Bedrock → Jina AI
-- ✅ Frontend: Updated React components
-- ✅ API: RESTful endpoints with session management
+#### OpenAI API Key
+- **Purpose**: Generating embeddings for text chunks
+- **Usage**: Converting text to vectors for Pinecone storage
+- **Configuration**: Set in `OPENAI_API_KEY` environment variable
 
-**What Improved:**
-- 🚀 Better performance with async/await
-- 🔄 Real-time streaming responses
-- 💾 Persistent session storage
-- 📰 Automated news ingestion
-- 🐳 Docker containerization
-- ☁️ Cloud deployment ready
-- 🔍 Better monitoring and health checks
+### Embedding Process
 
-## 🤝 Contributing
+#### Text Chunking Strategy
+```javascript
+function chunkText(text, chunkSize = 1000, overlap = 200) {
+  const chunks = [];
+  let start = 0;
+  
+  while (start < text.length) {
+    const end = Math.min(start + chunkSize, text.length);
+    const chunk = text.slice(start, end);
+    
+    chunks.push({
+      text: chunk,
+      start,
+      end
+    });
+    
+    start = end - overlap; // Overlap for context continuity
+  }
+  
+  return chunks;
+}
+```
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests
-5. Submit a pull request
+#### Vector Dimensions
+- **Model**: `text-embedding-3-small`
+- **Dimensions**: 1024
+- **Pinecone Index**: Configured for 1024 dimensions
 
-## 📄 License
+### Redis Usage
 
-MIT License - see LICENSE file for details
+#### Session Storage
+```javascript
+// Session key format
+session:${sessionId}
 
-## 🆘 Support
+// Message structure
+{
+  "role": "user|assistant",
+  "content": "message text",
+  "timestamp": "ISO date string"
+}
+```
 
-For issues and questions:
-1. Check the [Issues](https://github.com/your-repo/issues) page
-2. Create a new issue with detailed description
-3. Include logs and environment details
+#### TTL Management
+- **Default TTL**: 3600 seconds (1 hour)
+- **Max Messages**: 100 per session
+- **Auto-cleanup**: Redis automatically removes expired sessions
 
-## 📚 Documentation
+## 🐳 Docker Deployment
 
-- [Backend README](./backend-new/README.md) - Detailed backend documentation
-- [Frontend README](./frontend-new/README.md) - Detailed frontend documentation
-- [API Documentation](./backend-new/README.md#api-endpoints) - API reference
-- [Deployment Guide](./backend-new/README.md#deployment) - Deployment instructions
+### Single Container (Backend + Redis)
+```bash
+# Build image with Redis included
+docker build -f backend-new/Dockerfile.with-redis -t voicebot-backend-redis .
 
-## 🎯 Roadmap
+# Run container
+docker run -p 3001:3001 \
+  -e PINECONE_API_KEY=your_key \
+  -e GEMINI_API_KEY=your_key \
+  -e OPENAI_API_KEY=your_key \
+  voicebot-backend-redis
+```
 
-- [ ] Voice transcription integration
-- [ ] Multi-language support
-- [ ] Advanced RAG with document uploads
-- [ ] User authentication
-- [ ] Analytics dashboard
-- [ ] Mobile app
-- [ ] WebSocket real-time updates
-- [ ] Advanced caching strategies
+### Multi-Container Setup
+```bash
+# Use Docker Compose
+docker-compose up --build
 
----
+# Production deployment
+docker-compose -f docker-compose.production.yml up -d
+```
 
-**Built with ❤️ using modern web technologies**
+### Docker Compose Services
+```yaml
+services:
+  redis:
+    image: redis:7-alpine
+    
+    ports:
+      - "6379:6379"
+  
+  backend:
+    build: ./backend-new
+    ports:
+      - "3001:3001"
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      - redis
+  
+  frontend:
+    build: ./frontend-new
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+```
+
+## 🚀 Production Deployment
+
+### Render.com Deployment
+```yaml
+# render.yaml
+services:
+  - type: web
+    name: voicebot-backend
+    env: node
+    plan: starter
+    nodeVersion: 20
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: PINECONE_API_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+
+databases:
+  - name: voicebot-redis
+    plan: starter
+```
+
+### Environment Variables for Production
+```bash
+NODE_ENV=production
+PORT=10000
+REDIS_URL=redis://redis-connection-string
+PINECONE_API_KEY=your_production_key
+GEMINI_API_KEY=your_production_key
+OPENAI_API_KEY=your_production_key
+```
+
+## 📊 Sample Questions
+
+The application includes a comprehensive set of sample questions organized by category:
+
+### AI & Technology
+- "What are the latest developments in artificial intelligence?"
+- "Tell me about recent AI breakthroughs in healthcare"
+- "How is machine learning being used in finance?"
+
+### Healthcare AI
+- "How is AI being used in medical diagnosis?"
+- "What are the latest AI applications in healthcare?"
+- "Tell me about AI-powered drug discovery"
+
+### Research & Development
+- "What's new in natural language processing?"
+- "Explain the latest robotics innovations"
+- "How is AI transforming different industries?"
+
+## 🔍 Troubleshooting
+
+### Common Issues
+
+#### 1. Pinecone Connection Errors
+```bash
+# Check Pinecone configuration
+curl http://localhost:3001/api/health
+
+# Verify API key and environment
+echo $PINECONE_API_KEY
+echo $PINECONE_ENVIRONMENT
+```
+
+#### 2. Redis Connection Issues
+```bash
+# Test Redis connection
+redis-cli ping
+
+# Check Redis logs
+docker logs voicebot-redis
+```
+
+#### 3. Frontend-Backend Communication
+```bash
+# Verify backend is running
+curl http://localhost:3001/api/health
+
+# Check frontend proxy configuration
+# frontend-new/package.json should have:
+"proxy": "http://localhost:3001"
+```
+
+### Debug Mode
+```bash
+# Enable debug logging
+DEBUG=* npm run dev
+
+# Check service initialization
+curl http://localhost:3001/api/health
+```
+
+## 📁 Project Structure
+
+```
+voicebot-main/
+├── backend-new/                 # Node.js backend
+│   ├── src/
+│   │   ├── app.js              # Main application entry
+│   │   ├── config/             # Configuration management
+│   │   ├── services/           # Service layer (Redis, Pinecone, Gemini)
+│   │   ├── routes/             # API routes
+│   │   └── scripts/            # Utility scripts
+│   ├── Dockerfile              # Backend container
+│   ├── Dockerfile.with-redis   # Backend + Redis container
+│   └── package.json
+├── frontend-new/               # React frontend
+│   ├── src/
+│   │   ├── App.js             # Main React component
+│   │   ├── components/        # React components
+│   │   ├── hooks/             # Custom React hooks
+│   │   └── styles/            # CSS styles
+│   ├── Dockerfile             # Frontend container
+│   └── package.json
+├── docker-compose.yml          # Development setup
+├── docker-compose.production.yml # Production setup
+├── render.yaml                 # Render.com deployment
+└── README.md                   # This file
+```
+
+## 🎯 Key Features
+
+- **RAG Pipeline**: Retrieval Augmented Generation for context-aware responses
+- **Vector Search**: Pinecone-powered semantic search
+- **Session Management**: Redis-based chat history persistence
+- **Multi-AI Integration**: Gemini for responses, OpenAI for embeddings
+- **Docker Support**: Complete containerization with Docker Compose
+- **Production Ready**: Deployment configurations for major platforms
+- **Sample Questions**: Built-in question suggestions for users
+- **Health Monitoring**: Comprehensive health check endpoints
+
+## 🔄 Data Flow Summary
+
+1. **Startup**: Services initialize → Database connections established
+2. **Ingestion**: News articles → Text chunking → Embedding generation → Vector storage
+3. **Query**: User message → Query embedding → Vector search → Context retrieval
+4. **Generation**: Context + query → Gemini processing → Response generation
+5. **Storage**: User message + AI response → Redis session storage
+6. **Display**: Response → Frontend rendering → User interaction
+
+This architecture ensures scalable, context-aware AI responses with persistent session management and efficient vector-based information retrieval.

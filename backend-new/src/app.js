@@ -49,6 +49,7 @@ app.use('/static', express.static('public'));
 // Routes
 app.use('/api/chat', require('./routes/chat-rag'));
 app.use('/api/news', require('./routes/news'));
+app.use('/api/documents', require('./routes/documents'));
 app.use('/api/health', healthRoutes);
 
 // Root endpoint

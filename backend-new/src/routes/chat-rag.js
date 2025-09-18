@@ -18,7 +18,7 @@ const validateRequest = (req, res, next) => {
   next();
 };
 
-// Mock embedding generator (creates random 1024-dimensional vectors)
+// Mock embedding generator (for testing without OpenAI API key)
 function generateMockEmbedding(text) {
   const embedding = [];
   for (let i = 0; i < 1024; i++) {
@@ -26,6 +26,19 @@ function generateMockEmbedding(text) {
     embedding.push(Math.random() * 2 - 1);
   }
   return embedding;
+}
+
+// Real embedding generator using OpenAI API
+async function generateRealEmbedding(text) {
+  try {
+    const services = getServices();
+    const embedding = await services.pineconeEmbeddings.getEmbedding(text);
+    return embedding;
+  } catch (error) {
+    console.error('Error generating real embedding:', error);
+    console.log('Falling back to mock embedding for testing...');
+    return generateMockEmbedding(text);
+  }
 }
 
 // POST /api/chat - Handle new chat queries with RAG
@@ -60,9 +73,9 @@ router.post('/', [
       console.warn('⚠️ Redis not available - session not persisted');
     }
     
-    // Generate query embedding
+    // Generate query embedding using real OpenAI API
     console.log('🔍 Generating query embedding...');
-    const queryEmbedding = generateMockEmbedding(message);
+    const queryEmbedding = await generateRealEmbedding(message);
     
     // Search for relevant content in Pinecone
     console.log('🔍 Searching Pinecone for relevant content...');
@@ -80,7 +93,7 @@ router.post('/', [
           return `Article ${index + 1}: ${match.metadata.title}\n${match.metadata.content}`;
         }).join('\n\n');
         
-        console.log('📝 Context built from search results');
+        console.log('📝 Context built from search results',relevantContext);
       } else {
         console.log('⚠️ No relevant articles found in Pinecone');
       }
@@ -121,7 +134,7 @@ ${conversationContext}
 - If you don't know something, say so honestly`;
 
       response = await services.gemini.generateResponse(message, systemPrompt);
-      console.log('✅ Response generated successfully');
+      console.log('✅ Response generated successfully============>>>>>',response);
     } catch (error) {
       console.error('❌ Error generating response:', error.message);
       response = "I'm sorry, I'm having trouble generating a response right now. Please try again later.";

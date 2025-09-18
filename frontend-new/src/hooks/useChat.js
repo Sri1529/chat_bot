@@ -132,7 +132,7 @@ const useChat = () => {
         // Simulate streaming by breaking the response into chunks
         const responseText = data.data.message;
         const words = responseText.split(' ');
-        
+        console.log('words',words);
         // Send chunks word by word
         for (let i = 0; i < words.length; i++) {
           const word = words[i] + (i < words.length - 1 ? ' ' : '');

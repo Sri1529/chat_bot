@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Mic, MicOff, Send, Volume2, VolumeX, Bot, RotateCcw } from 'lucide-react';
+import { Mic, MicOff, Send, Volume2, VolumeX, Bot, RotateCcw, HelpCircle } from 'lucide-react';
 import MessageList from './components/MessageList';
+import SampleQuestions from './components/SampleQuestions';
 import useChat from './hooks/useChat';
 import useTextToSpeech from './hooks/useTextToSpeech';
 import useAudioRecorder from './hooks/useAudioRecorder';
@@ -21,6 +22,7 @@ const App = () => {
   const [inputText, setInputText] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamingText, setStreamingText] = useState('');
+  const [showSampleQuestions, setShowSampleQuestions] = useState(false);
   
   const messagesEndRef = useRef(null);
   
@@ -106,6 +108,15 @@ const App = () => {
     } catch (error) {
       console.error('Failed to reset chat:', error);
     }
+  };
+
+  const handleSampleQuestionClick = (question) => {
+    setInputText(question);
+    setShowSampleQuestions(false);
+    // Auto-send the question
+    setTimeout(() => {
+      handleSendMessage();
+    }, 100);
   };
 
   const handleSendMessage = async () => {
@@ -205,6 +216,15 @@ const App = () => {
             </div>
             
             <div className="flex items-center space-x-2">
+              <button
+                onClick={() => setShowSampleQuestions(!showSampleQuestions)}
+                className={`p-2 rounded-full transition-colors ${
+                  showSampleQuestions ? 'bg-purple-100 text-purple-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+                title="Sample Questions"
+              >
+                <HelpCircle className="w-5 h-5" />
+              </button>
               <button
                 onClick={handleResetChat}
                 className="p-2 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
@@ -330,6 +350,13 @@ const App = () => {
             )}
           </div>
         </div>
+
+        {/* Sample Questions */}
+        {showSampleQuestions && (
+          <div className="mt-4">
+            <SampleQuestions onQuestionClick={handleSampleQuestionClick} isVisible={showSampleQuestions} />
+          </div>
+        )}
       </div>
     </div>
   );

@@ -1,11 +1,15 @@
-# Use Node.js 20 LTS
+# Dockerfile with Backend + Redis (Redis starts first, then app)
 FROM node:20-alpine
+
+# Install Redis and other dependencies
+RUN apk add --no-cache \
+    redis \
+    dumb-init \
+    bash \
+    supervisor
 
 # Set working directory
 WORKDIR /app
-
-# Install dumb-init for proper signal handling
-RUN apk add --no-cache dumb-init
 
 # Copy package files
 COPY package*.json ./
@@ -26,7 +30,6 @@ RUN addgroup -g 1001 -S nodejs && \
 
 # Change ownership of the app directory
 RUN chown -R nodejs:nodejs /app
-USER nodejs
 
 # Set default environment variables for production
 ENV NODE_ENV=production
@@ -34,6 +37,7 @@ ENV PORT=3001
 ENV REDIS_HOST=localhost
 ENV REDIS_PORT=6379
 ENV REDIS_DB=0
+ENV REDIS_URL=redis://localhost:6379/0
 ENV PINECONE_ENVIRONMENT=us-east-1-aws
 ENV PINECONE_INDEX_NAME=voicebot-index
 ENV PINECONE_DIMENSION=1024
@@ -48,13 +52,16 @@ ENV SESSION_MAX_MESSAGES=100
 ENV NEWS_MAX_ARTICLES=50
 ENV NEWS_UPDATE_INTERVAL=3600000
 
-# Expose port (use PORT environment variable)
-EXPOSE 3001
+# Create supervisor configuration
+RUN mkdir -p /etc/supervisor/conf.d
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+# Expose ports
+EXPOSE 3001 6379
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD node -e "require('http').get('http://localhost:3001/api/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"
 
-# Start the application with dumb-init
-ENTRYPOINT ["dumb-init", "--"]
-CMD ["npm", "start"]
+# Start Redis first, then the application
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]

@@ -1,22 +1,36 @@
 version: '3.8'
 
 services:
-  # VoiceBot Backend with Redis
-  voicebot:
+  # Redis Service
+  redis:
+    image: redis:7-alpine
+    container_name: voicebot-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Backend Service
+  backend:
     build:
       context: ./backend-new
-      dockerfile: Dockerfile.with-redis
-    container_name: voicebot-app
+      dockerfile: Dockerfile
+    container_name: voicebot-backend
     ports:
       - "3001:3001"
-      - "6379:6379"
     environment:
       - NODE_ENV=production
       - PORT=3001
-      - REDIS_HOST=localhost
+      - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_DB=0
-      - REDIS_URL=redis://localhost:6379/0
       - PINECONE_API_KEY=${PINECONE_API_KEY}
       - PINECONE_ENVIRONMENT=us-east-1-aws
       - PINECONE_INDEX_NAME=voicebot-index
@@ -33,24 +47,16 @@ services:
       - SESSION_MAX_MESSAGES=100
       - NEWS_MAX_ARTICLES=50
       - NEWS_UPDATE_INTERVAL=3600000
+    depends_on:
+      redis:
+        condition: service_healthy
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "node", "-e", "require('http').get('http://localhost:3001/api/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 40s
 
-  # Frontend (Optional - if you want to run frontend too)
-  frontend:
-    build:
-      context: ./frontend-new
-      dockerfile: Dockerfile
-    container_name: voicebot-frontend
-    ports:
-      - "3000:80"
-    environment:
-      - REACT_APP_API_URL=http://localhost:3001/api
-    depends_on:
-      - voicebot
-    restart: unless-stopped
+volumes:
+  redis_data:
+    driver: local

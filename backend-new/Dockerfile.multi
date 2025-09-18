@@ -1,5 +1,5 @@
-# Use Node.js 20 LTS
-FROM node:20-alpine
+# Multi-stage Dockerfile with Backend + Redis
+FROM node:20-alpine AS backend
 
 # Set working directory
 WORKDIR /app
@@ -26,7 +26,6 @@ RUN addgroup -g 1001 -S nodejs && \
 
 # Change ownership of the app directory
 RUN chown -R nodejs:nodejs /app
-USER nodejs
 
 # Set default environment variables for production
 ENV NODE_ENV=production
@@ -48,7 +47,7 @@ ENV SESSION_MAX_MESSAGES=100
 ENV NEWS_MAX_ARTICLES=50
 ENV NEWS_UPDATE_INTERVAL=3600000
 
-# Expose port (use PORT environment variable)
+# Expose port
 EXPOSE 3001
 
 # Health check

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Mic, MicOff, Send, Volume2, VolumeX, Bot, RotateCcw, HelpCircle } from 'lucide-react';
+import { Mic, Send, Bot, RotateCcw, HelpCircle } from 'lucide-react';
 import MessageList from './components/MessageList';
 import SampleQuestions from './components/SampleQuestions';
 import useChat from './hooks/useChat';
@@ -17,7 +17,6 @@ const App = () => {
   };
 
   const [messages, setMessages] = useState([]);
-  const [isMuted, setIsMuted] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [inputText, setInputText] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
@@ -26,10 +25,8 @@ const App = () => {
   
   const messagesEndRef = useRef(null);
   
-  const { speak, stopSpeaking, isSpeaking } = useTextToSpeech();
+  const { speak } = useTextToSpeech();
   const { 
-    startRecording: startAudioRecording, 
-    stopRecording: stopAudioRecording, 
     isRecording: isAudioRecording, 
     audioBlob, 
     clearAudio 
@@ -79,21 +76,6 @@ const App = () => {
     }
   }, [chatHistory, sessionId]);
 
-  const handleVoiceToggle = () => {
-    if (isVoiceMode) {
-      stopAudioRecording();
-    } else {
-      setInputText(''); // Clear input when starting recording
-      startAudioRecording();
-    }
-  };
-
-  const handleMuteToggle = () => {
-    if (isSpeaking) {
-      stopSpeaking();
-    }
-    setIsMuted(!isMuted);
-  };
 
   const handleResetChat = async () => {
     try {
@@ -140,8 +122,8 @@ const App = () => {
           setIsStreaming(false);
           setIsTyping(false);
           
-          // Speak the response if not muted
-          if (!isMuted && streamingText) {
+          // Speak the response
+          if (streamingText) {
             speak(streamingText);
           }
         },
@@ -159,7 +141,7 @@ const App = () => {
       setIsTyping(false);
       setStreamingText('');
     }
-  }, [inputText, isProcessing, sendStreamingMessage, isMuted, speak, streamingText]);
+  }, [inputText, isProcessing, sendStreamingMessage, speak, streamingText]);
 
   const handleSendVoiceMessage = useCallback(async (audioBlob) => {
     try {
@@ -229,7 +211,7 @@ const App = () => {
               >
                 <RotateCcw className="w-5 h-5" />
               </button>
-              <button
+              {/* <button
                 onClick={handleMuteToggle}
                 className={`p-2 rounded-full transition-colors ${
                   isMuted ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -237,7 +219,7 @@ const App = () => {
                 title={isMuted ? 'Unmute' : 'Mute'}
               >
                 {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
-              </button>
+              </button> */}
             </div>
           </div>
         </div>
@@ -259,7 +241,7 @@ const App = () => {
           <div className="border-t p-6">
             <div className="flex items-center space-x-4">
               {/* Voice Recording Button */}
-              <button
+              {/* <button
                 onClick={handleVoiceToggle}
                 className={`p-4 rounded-full transition-all duration-200 ${
                   isVoiceMode 
@@ -270,7 +252,7 @@ const App = () => {
                 title="Voice Recording"
               >
                 {isVoiceMode ? <MicOff className="w-6 h-6" /> : <Mic className="w-6 h-6" />}
-              </button>
+              </button> */}
 
               {/* Text Input */}
               <div className="flex-1">

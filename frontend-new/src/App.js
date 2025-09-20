@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Mic, MicOff, Send, Volume2, VolumeX, Bot, RotateCcw, HelpCircle } from 'lucide-react';
 import MessageList from './components/MessageList';
 import SampleQuestions from './components/SampleQuestions';
@@ -32,14 +32,11 @@ const App = () => {
     stopRecording: stopAudioRecording, 
     isRecording: isAudioRecording, 
     audioBlob, 
-    error: audioError,
     clearAudio 
   } = useAudioRecorder();
   
   const { 
-    sendMessage, 
     sendStreamingMessage,
-    getChatHistory,
     clearChatHistory,
     resetSession,
     sessionId,
@@ -119,7 +116,7 @@ const App = () => {
     }, 100);
   };
 
-  const handleSendMessage = async () => {
+  const handleSendMessage = useCallback(async () => {
     if (!inputText.trim() || isProcessing) return;
 
     const messageText = inputText.trim();
@@ -162,16 +159,9 @@ const App = () => {
       setIsTyping(false);
       setStreamingText('');
     }
-  };
+  }, [inputText, isProcessing, sendStreamingMessage, isMuted, speak, streamingText]);
 
-  // Handle sending voice message when audio is ready
-  useEffect(() => {
-    if (audioBlob && !isAudioRecording) {
-      handleSendVoiceMessage(audioBlob);
-    }
-  }, [audioBlob, isAudioRecording]);
-
-  const handleSendVoiceMessage = async (audioBlob) => {
+  const handleSendVoiceMessage = useCallback(async (audioBlob) => {
     try {
       // For now, we'll just send a placeholder message
       // In a real implementation, you'd transcribe the audio first
@@ -192,7 +182,14 @@ const App = () => {
       console.error('Error sending voice message:', error);
       clearAudio();
     }
-  };
+  }, [clearAudio, handleSendMessage]);
+
+  // Handle sending voice message when audio is ready
+  useEffect(() => {
+    if (audioBlob && !isAudioRecording) {
+      handleSendVoiceMessage(audioBlob);
+    }
+  }, [audioBlob, isAudioRecording, handleSendVoiceMessage]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">

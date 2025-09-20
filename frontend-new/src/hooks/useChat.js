@@ -20,13 +20,6 @@ const useChat = () => {
     }
   }, [sessionId]);
 
-  // Load chat history when session ID is available
-  useEffect(() => {
-    if (sessionId) {
-      loadChatHistory();
-    }
-  }, [sessionId]);
-
   const loadChatHistory = useCallback(async () => {
     if (!sessionId) return;
     
@@ -46,6 +39,13 @@ const useChat = () => {
       console.error('Failed to load chat history:', err);
     }
   }, [sessionId]);
+
+  // Load chat history when session ID is available
+  useEffect(() => {
+    if (sessionId) {
+      loadChatHistory();
+    }
+  }, [sessionId, loadChatHistory]);
 
   const sendMessage = useCallback(async (message, options = {}) => {
     setIsLoading(true);
@@ -98,7 +98,7 @@ const useChat = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [sessionId]);
+  }, [sessionId, loadChatHistory]);
 
   const sendStreamingMessage = useCallback(async (message, onChunk, onComplete, onError) => {
     setIsLoading(true);
@@ -157,7 +157,7 @@ const useChat = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [sessionId]);
+  }, [sessionId, loadChatHistory]);
 
   const getChatHistory = useCallback(async (sessionIdToUse = sessionId) => {
     if (!sessionIdToUse) {

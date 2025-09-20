@@ -1,5 +1,5 @@
 import React from 'react';
-import { Bot, User, Mic, MessageSquare } from 'lucide-react';
+import { Bot, Mic, MessageSquare } from 'lucide-react';
 
 const MessageList = ({ messages, isTyping, streamingText, isStreaming }) => {
   const formatTime = (timestamp) => {

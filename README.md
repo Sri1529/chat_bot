@@ -33,7 +33,7 @@ A modern, full-stack chatbot built with React, Node.js, and cutting-edge AI tech
 - **Pinecone** - Vector database for embeddings
 - **Google Gemini** - Large language model
 - **OpenAI API** - Alternative LLM provider
-- **Jina AI** - Embedding service
+- **Pinecone Embeddings** - Vector embeddings service
 
 ### Infrastructure
 - **Docker** - Containerization

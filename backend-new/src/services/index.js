@@ -2,7 +2,6 @@ const redisService = require('./redisService');
 const pineconeService = require('./pineconeService');
 const geminiService = require('./geminiService');
 const pineconeEmbeddingsService = require('./pineconeEmbeddingsService');
-const newsService = require('./newsService');
 
 let services = {};
 
@@ -25,12 +24,6 @@ async function initializeServices() {
 
     services.pineconeEmbeddings = pineconeEmbeddingsService;
     await pineconeEmbeddingsService.initialize();
-
-    services.news = newsService;
-    await newsService.initialize();
-
-    // Start news ingestion in background (optional)
-    // services.news.startIngestion(); // Commented out for now
 
     return services;
   } catch (error) {

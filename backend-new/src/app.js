@@ -6,7 +6,6 @@ const compression = require('compression');
 const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
-const chatRoutes = require('./routes/chat');
 const healthRoutes = require('./routes/health');
 const { initializeServices } = require('./services');
 const { errorHandler } = require('./middleware/errorHandler');
@@ -55,13 +54,14 @@ app.use('/api/health', healthRoutes);
 // Root endpoint
 app.get('/', (req, res) => {
   res.json({
-    message: 'Voice Chatbot API',
+    message: 'ChatBot API',
     version: '2.0.0',
     status: 'running',
     endpoints: {
       health: '/api/health',
       chat: '/api/chat',
-      docs: '/api/docs'
+      news: '/api/news',
+      documents: '/api/documents'
     }
   });
 });

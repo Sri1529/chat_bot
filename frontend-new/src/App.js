@@ -1,10 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Mic, Send, Bot, RotateCcw, HelpCircle } from 'lucide-react';
+import { Send, Bot, RotateCcw, HelpCircle } from 'lucide-react';
 import MessageList from './components/MessageList';
 import SampleQuestions from './components/SampleQuestions';
 import useChat from './hooks/useChat';
-import useTextToSpeech from './hooks/useTextToSpeech';
-import useAudioRecorder from './hooks/useAudioRecorder';
 import './index.css';
 
 const App = () => {
@@ -25,12 +23,6 @@ const App = () => {
   
   const messagesEndRef = useRef(null);
   
-  const { speak } = useTextToSpeech();
-  const { 
-    isRecording: isAudioRecording, 
-    audioBlob, 
-    clearAudio 
-  } = useAudioRecorder();
   
   const { 
     sendStreamingMessage,
@@ -42,8 +34,6 @@ const App = () => {
     error: chatError 
   } = useChat();
 
-  // Determine which recording mode we're in
-  const isVoiceMode = isAudioRecording;
   const isProcessing = isLoading || isStreaming;
 
   // Scroll to bottom when new messages arrive
@@ -121,10 +111,6 @@ const App = () => {
           setIsStreaming(false);
           setIsTyping(false);
           
-          // Speak the response
-          if (streamingText) {
-            speak(streamingText);
-          }
         },
         // onError
         (error) => {
@@ -138,36 +124,8 @@ const App = () => {
       setIsTyping(false);
       setStreamingText('');
     }
-  }, [inputText, isProcessing, sendStreamingMessage, speak, streamingText]);
+  }, [inputText, isProcessing, sendStreamingMessage, streamingText]);
 
-  const handleSendVoiceMessage = useCallback(async (audioBlob) => {
-    try {
-      // For now, we'll just send a placeholder message
-      // In a real implementation, you'd transcribe the audio first
-      const userMessage = {
-        id: Date.now().toString(),
-        text: 'Voice message (transcription not implemented)',
-        sender: 'user',
-        timestamp: new Date(),
-        isVoice: true
-      };
-
-      setMessages(prev => [...prev, userMessage]);
-      clearAudio();
-      
-      // Send a text message instead
-      await handleSendMessage();
-    } catch (error) {
-      clearAudio();
-    }
-  }, [clearAudio, handleSendMessage]);
-
-  // Handle sending voice message when audio is ready
-  useEffect(() => {
-    if (audioBlob && !isAudioRecording) {
-      handleSendVoiceMessage(audioBlob);
-    }
-  }, [audioBlob, isAudioRecording, handleSendVoiceMessage]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
@@ -207,15 +165,6 @@ const App = () => {
               >
                 <RotateCcw className="w-5 h-5" />
               </button>
-              {/* <button
-                onClick={handleMuteToggle}
-                className={`p-2 rounded-full transition-colors ${
-                  isMuted ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-                title={isMuted ? 'Unmute' : 'Mute'}
-              >
-                {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
-              </button> */}
             </div>
           </div>
         </div>
@@ -236,19 +185,6 @@ const App = () => {
           {/* Input Area */}
           <div className="border-t p-6">
             <div className="flex items-center space-x-4">
-              {/* Voice Recording Button */}
-              {/* <button
-                onClick={handleVoiceToggle}
-                className={`p-4 rounded-full transition-all duration-200 ${
-                  isVoiceMode 
-                    ? 'bg-red-500 text-white animate-pulse shadow-lg' 
-                    : 'bg-blue-500 text-white hover:bg-blue-600 shadow-md'
-                }`}
-                disabled={isProcessing}
-                title="Voice Recording"
-              >
-                {isVoiceMode ? <MicOff className="w-6 h-6" /> : <Mic className="w-6 h-6" />}
-              </button> */}
 
               {/* Text Input */}
               <div className="flex-1">
@@ -257,7 +193,6 @@ const App = () => {
                   value={inputText}
                   onChange={(e) => setInputText(e.target.value)}
                   placeholder={
-                    isVoiceMode ? "Recording... Click mic to stop" :
                     isProcessing ? "Processing..." :
                     "Ask me about current news and events..."
                   }
@@ -267,17 +202,13 @@ const App = () => {
                       handleSendMessage();
                     }
                   }}
-                  disabled={isVoiceMode || isProcessing}
+                  disabled={isProcessing}
                 />
               </div>
 
               {/* Send Button */}
               <button
-                className={`p-3 rounded-full transition-colors disabled:opacity-50 ${
-                  isVoiceMode 
-                    ? 'bg-red-500 text-white hover:bg-red-600' 
-                    : 'bg-blue-500 text-white hover:bg-blue-600'
-                }`}
+                className='p-3 rounded-full transition-colors disabled:opacity-50 bg-blue-500 text-white hover:bg-blue-600'
                 disabled={!inputText.trim() || isProcessing}
                 onClick={handleSendMessage}
                 title="Send message"
@@ -296,15 +227,6 @@ const App = () => {
               </div>
             )}
 
-            {/* Status Messages */}
-            {isVoiceMode && (
-              <div className="mt-3 text-center">
-                <p className="text-sm text-red-600 flex items-center justify-center space-x-2">
-                  <Mic className="w-4 h-4" />
-                  <span>Recording... Speak now</span>
-                </p>
-              </div>
-            )}
             
             {isTyping && (
               <div className="mt-3 text-center">

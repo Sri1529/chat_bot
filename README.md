@@ -2,10 +2,7 @@
 
 A modern, full-stack chatbot built with React, Node.js, and cutting-edge AI technologies. ChatBot combines natural language processing and Retrieval-Augmented Generation (RAG) to provide intelligent conversations about news and current events.
 
-![ChatBot Demo](https://img.shields.io/badge/Status-Production%20Ready-brightgreen)
-![React](https://img.shields.io/badge/React-18.2.0-blue)
-![Node.js](https://img.shields.io/badge/Node.js-20.x-green)
-![Docker](https://img.shields.io/badge/Docker-Ready-blue)
+
 
 ## 🌟 Features
 

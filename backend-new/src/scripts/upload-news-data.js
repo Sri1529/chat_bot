@@ -109,12 +109,9 @@ function chunkText(text, chunkSize = 500, overlap = 50) {
 
 async function uploadNewsData() {
   try {
-    console.log('🚀 Starting news data upload to Pinecone...');
     
     // Initialize services first
-    console.log('🔧 Initializing services...');
     await initializeServices();
-    console.log('✅ Services initialized');
     
     // Get services
     const services = getServices();
@@ -124,7 +121,6 @@ async function uploadNewsData() {
     
     for (let i = 0; i < newsArticles.length; i++) {
       const article = newsArticles[i];
-      console.log(`📰 Processing article ${i + 1}/${newsArticles.length}: ${article.title}`);
       
       // Chunk the article content
       const chunks = chunkText(article.content);
@@ -154,57 +150,40 @@ async function uploadNewsData() {
       }
     }
     
-    console.log(`📤 Uploading ${allVectors.length} vectors to Pinecone...`);
     
     // Upload to Pinecone in batches
     const batchSize = 100;
     for (let i = 0; i < allVectors.length; i += batchSize) {
       const batch = allVectors.slice(i, i + batchSize);
-      console.log(`📦 Uploading batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(allVectors.length / batchSize)}`);
       
       try {
         const result = await services.pinecone.upsertVectors(batch);
-        console.log(`✅ Batch uploaded successfully`);
       } catch (error) {
-        console.error(`❌ Error uploading batch:`, error.message);
         // Continue with next batch
       }
     }
     
-    console.log('✅ News data upload completed!');
     
     // Verify upload
-    console.log('🔍 Verifying upload...');
     try {
       const stats = await services.pinecone.getIndexStats();
-      console.log('📈 Index stats:', stats);
     } catch (error) {
-      console.log('⚠️ Could not get index stats:', error.message);
     }
     
     // Test search
-    console.log('🔍 Testing search functionality...');
     const testQuery = "What is artificial intelligence?";
     const testEmbedding = generateMockEmbedding(testQuery);
     
     try {
       const searchResults = await services.pinecone.queryVectors(testEmbedding, 3);
       
-      console.log('🔍 Search results for "What is artificial intelligence?":');
       searchResults.matches?.forEach((match, index) => {
-        console.log(`${index + 1}. Title: ${match.metadata.title}`);
-        console.log(`   Content: ${match.metadata.content.substring(0, 100)}...`);
-        console.log(`   Score: ${match.score}`);
-        console.log('---');
       });
     } catch (error) {
-      console.log('⚠️ Could not test search:', error.message);
     }
     
-    console.log('🎉 News data upload and testing completed successfully!');
     
   } catch (error) {
-    console.error('❌ Error uploading news data:', error);
     throw error;
   }
 }
@@ -213,11 +192,9 @@ async function uploadNewsData() {
 if (require.main === module) {
   uploadNewsData()
     .then(() => {
-      console.log('✅ Script completed successfully');
       process.exit(0);
     })
     .catch((error) => {
-      console.error('❌ Script failed:', error);
       process.exit(1);
     });
 }

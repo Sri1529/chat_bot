@@ -1,7 +1,7 @@
 {
-  "name": "voicebot-frontend",
+  "name": "chatbot-frontend",
   "version": "2.0.0",
-  "description": "React frontend for voice chatbot with RAG pipeline",
+  "description": "React frontend for AI chatbot with RAG pipeline",
   "private": true,
   "dependencies": {
     "@testing-library/jest-dom": "^5.16.4",

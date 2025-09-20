@@ -1,7 +1,7 @@
 {
-  "name": "voicebot-backend",
+  "name": "chatbot-backend",
   "version": "1.0.0",
-  "description": "Node.js Express backend for voice chatbot with RAG pipeline",
+  "description": "Node.js Express backend for AI chatbot with RAG pipeline",
   "main": "src/app.js",
   "scripts": {
     "start": "node src/app.js",

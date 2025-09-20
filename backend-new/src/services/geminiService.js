@@ -19,10 +19,8 @@ async function initialize() {
       }
     });
 
-    console.log(`Gemini service initialized with model: ${config.gemini.model}`);
     return model;
   } catch (error) {
-    console.error('Failed to initialize Gemini service:', error);
     throw error;
   }
 }
@@ -53,10 +51,8 @@ User Question: ${query}`;
     const response = await result.response;
     const text = response.text();
 
-    console.log('Generated response from Gemini');
     return text;
   } catch (error) {
-    console.error('Error generating response with Gemini:', error);
     throw error;
   }
 }
@@ -87,7 +83,6 @@ User Question: ${query}`;
     
     return result.stream;
   } catch (error) {
-    console.error('Error generating streaming response with Gemini:', error);
     throw error;
   }
 }
@@ -108,7 +103,6 @@ ${text}`;
 
     return summary;
   } catch (error) {
-    console.error('Error summarizing text with Gemini:', error);
     throw error;
   }
 }
@@ -129,7 +123,6 @@ ${text}`;
 
     return keywords.split(',').map(k => k.trim()).filter(k => k.length > 0);
   } catch (error) {
-    console.error('Error extracting keywords with Gemini:', error);
     throw error;
   }
 }

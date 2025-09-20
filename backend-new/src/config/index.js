@@ -77,8 +77,8 @@ const requiredEnvVars = [
 const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
 
 if (missingVars.length > 0) {
-  console.error('❌ Missing required environment variables:', missingVars);
-  console.error('Please check your .env file');
+  // Missing required environment variables: ${missingVars}
+  // Please check your .env file
   process.exit(1);
 }
 

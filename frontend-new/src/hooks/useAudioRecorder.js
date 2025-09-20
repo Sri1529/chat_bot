@@ -47,7 +47,6 @@ const useAudioRecorder = () => {
       setIsRecording(true);
       
     } catch (err) {
-      console.error('Error starting recording:', err);
       setError('Failed to start recording. Please check microphone permissions.');
     }
   }, []);

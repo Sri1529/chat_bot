@@ -19,7 +19,6 @@ const useTextToSpeech = () => {
       
       window.speechSynthesis.speak(utterance);
     } else {
-      console.warn('Speech synthesis not supported');
     }
   }, []);
 

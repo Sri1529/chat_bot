@@ -35,8 +35,7 @@ async function generateRealEmbedding(text) {
     const embedding = await services.pineconeEmbeddings.getEmbedding(text);
     return embedding;
   } catch (error) {
-    console.error('Error generating real embedding:', error);
-    console.log('Falling back to mock embedding for testing...');
+    // Error generating real embedding, falling back to mock embedding
     return generateMockEmbedding(text);
   }
 }
@@ -57,7 +56,6 @@ router.post('/', [
     // Generate session ID if not provided
     const currentSessionId = sessionId || uuidv4();
     
-    console.log(`Processing RAG chat message for session: ${currentSessionId}`);
     
     // Add user message to session (if Redis is available)
     const userMessage = {
@@ -70,15 +68,13 @@ router.post('/', [
     if (services.redis) {
       await services.redis.addMessageToSession(currentSessionId, userMessage);
     } else {
-      console.warn('⚠️ Redis not available - session not persisted');
+      // Redis not available - session not persisted
     }
     
     // Generate query embedding using real OpenAI API
-    console.log('🔍 Generating query embedding...');
     const queryEmbedding = await generateRealEmbedding(message);
     
     // Search for relevant content in Pinecone
-    console.log('🔍 Searching Pinecone for relevant content...');
     let relevantContext = '';
     let searchResults = [];
     
@@ -86,19 +82,16 @@ router.post('/', [
       searchResults = await services.pinecone.queryVectors(queryEmbedding, 5);
       
       if (searchResults.matches && searchResults.matches.length > 0) {
-        console.log(`📚 Found ${searchResults.matches.length} relevant articles`);
         
         // Build context from search results
         relevantContext = searchResults.matches.map((match, index) => {
           return `Article ${index + 1}: ${match.metadata.title}\n${match.metadata.content}`;
         }).join('\n\n');
         
-        console.log('📝 Context built from search results',relevantContext);
       } else {
-        console.log('⚠️ No relevant articles found in Pinecone');
+        // No relevant articles found in Pinecone
       }
     } catch (error) {
-      console.error('❌ Error searching Pinecone:', error.message);
       // Continue without context
     }
     
@@ -115,7 +108,6 @@ router.post('/', [
     }
     
     // Generate response using Gemini with RAG context
-    console.log('🤖 Generating response with Gemini...');
     let response;
     try {
       const systemPrompt = `You are a helpful AI assistant that answers questions based on news articles and current events. Use the provided context to give accurate and informative answers.
@@ -134,9 +126,7 @@ ${conversationContext}
 - If you don't know something, say so honestly`;
 
       response = await services.gemini.generateResponse(message, systemPrompt);
-      console.log('✅ Response generated successfully============>>>>>',response);
     } catch (error) {
-      console.error('❌ Error generating response:', error.message);
       response = "I'm sorry, I'm having trouble generating a response right now. Please try again later.";
     }
     
@@ -176,7 +166,6 @@ ${conversationContext}
     });
     
   } catch (error) {
-    console.error('Error processing RAG chat message:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to process chat message',
@@ -204,7 +193,6 @@ router.get('/history/:sessionId', [
     });
     
   } catch (error) {
-    console.error('Error getting chat history:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to get chat history',
@@ -231,7 +219,6 @@ router.delete('/reset/:sessionId', [
     });
     
   } catch (error) {
-    console.error('Error clearing chat history:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to clear chat history',

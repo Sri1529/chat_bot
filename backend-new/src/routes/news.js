@@ -68,14 +68,12 @@ router.post('/upload', [
     const { articles } = req.body;
     const services = getServices();
     
-    console.log(`📰 Uploading ${articles.length} news articles...`);
     
     const allVectors = [];
     
     // Process each article
     for (let i = 0; i < articles.length; i++) {
       const article = articles[i];
-      console.log(`📰 Processing article ${i + 1}/${articles.length}: ${article.title}`);
       
       // Chunk the article content
       const chunks = chunkText(article.content);
@@ -105,7 +103,6 @@ router.post('/upload', [
       }
     }
     
-    console.log(`📤 Uploading ${allVectors.length} vectors to Pinecone...`);
     
     // Upload to Pinecone in batches
     const batchSize = 100;
@@ -113,14 +110,11 @@ router.post('/upload', [
     
     for (let i = 0; i < allVectors.length; i += batchSize) {
       const batch = allVectors.slice(i, i + batchSize);
-      console.log(`📦 Uploading batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(allVectors.length / batchSize)}`);
       
       try {
         await services.pinecone.upsertVectors(batch);
         uploadedCount += batch.length;
-        console.log(`✅ Batch uploaded successfully`);
       } catch (error) {
-        console.error(`❌ Error uploading batch:`, error.message);
         // Continue with next batch
       }
     }
@@ -136,7 +130,6 @@ router.post('/upload', [
     });
     
   } catch (error) {
-    console.error('Error uploading news articles:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to upload news articles',
@@ -154,7 +147,6 @@ router.get('/search', [
     const { query: searchQuery, limit = 5 } = req.query;
     const services = getServices();
     
-    console.log(`🔍 Searching for: "${searchQuery}"`);
     
     // Generate query embedding
     const queryEmbedding = generateMockEmbedding(searchQuery);
@@ -183,7 +175,6 @@ router.get('/search', [
     });
     
   } catch (error) {
-    console.error('Error searching news articles:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to search news articles',
@@ -218,7 +209,6 @@ router.get('/', [
     });
     
   } catch (error) {
-    console.error('Error getting news stats:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to get news information',
@@ -267,7 +257,6 @@ router.get('/:id', [
     });
     
   } catch (error) {
-    console.error('Error getting news article:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to get news article',

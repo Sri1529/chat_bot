@@ -18,21 +18,17 @@ async function initialize() {
       }
     });
 
-    console.log('News service initialized');
     return parser;
   } catch (error) {
-    console.error('Failed to initialize news service:', error);
     throw error;
   }
 }
 
 async function fetchRSSFeed(feedUrl) {
   try {
-    console.log(`Fetching RSS feed: ${feedUrl}`);
     const feed = await parser.parseURL(feedUrl);
     return feed.items || [];
   } catch (error) {
-    console.error(`Error fetching RSS feed ${feedUrl}:`, error);
     return [];
   }
 }
@@ -89,7 +85,6 @@ async function scrapeArticleContent(articleUrl) {
     
     return content;
   } catch (error) {
-    console.error(`Error scraping article content from ${articleUrl}:`, error);
     return '';
   }
 }
@@ -100,7 +95,6 @@ async function processArticle(article) {
     const content = await scrapeArticleContent(article.link);
     
     if (!content || content.length < 100) {
-      console.log(`Skipping article with insufficient content: ${article.title}`);
       return null;
     }
     
@@ -117,7 +111,6 @@ async function processArticle(article) {
     
     return articleData;
   } catch (error) {
-    console.error(`Error processing article: ${article.title}`, error);
     return null;
   }
 }
@@ -129,7 +122,6 @@ async function createArticleVectors(article) {
     const chunks = pineconeService.chunkText(fullText, config.rag.chunkSize, config.rag.chunkOverlap);
     
     if (chunks.length === 0) {
-      console.log(`No chunks created for article: ${article.title}`);
       return [];
     }
     
@@ -156,14 +148,12 @@ async function createArticleVectors(article) {
     
     return vectors;
   } catch (error) {
-    console.error(`Error creating vectors for article: ${article.title}`, error);
     return [];
   }
 }
 
 async function ingestNews() {
   try {
-    console.log('Starting news ingestion...');
     
     const allArticles = [];
     
@@ -173,7 +163,6 @@ async function ingestNews() {
       allArticles.push(...articles);
     }
     
-    console.log(`Fetched ${allArticles.length} articles from RSS feeds`);
     
     // Limit articles
     const limitedArticles = allArticles.slice(0, config.news.maxArticles);
@@ -187,7 +176,6 @@ async function ingestNews() {
       }
     }
     
-    console.log(`Processed ${processedArticles.length} articles`);
     
     // Create vectors and store in Pinecone
     let totalVectors = 0;
@@ -199,31 +187,27 @@ async function ingestNews() {
       }
     }
     
-    console.log(`News ingestion completed. Stored ${totalVectors} vectors in Pinecone`);
     return { articlesProcessed: processedArticles.length, vectorsStored: totalVectors };
   } catch (error) {
-    console.error('Error during news ingestion:', error);
     throw error;
   }
 }
 
 function startIngestion() {
   // Run initial ingestion
-  ingestNews().catch(console.error);
+  ingestNews().catch(() => {});
   
   // Set up periodic ingestion
   ingestionInterval = setInterval(() => {
-    ingestNews().catch(console.error);
+    ingestNews().catch(() => {});
   }, config.news.updateInterval);
   
-  console.log(`News ingestion scheduled every ${config.news.updateInterval / 1000 / 60} minutes`);
 }
 
 function stopIngestion() {
   if (ingestionInterval) {
     clearInterval(ingestionInterval);
     ingestionInterval = null;
-    console.log('News ingestion stopped');
   }
 }
 
@@ -241,7 +225,6 @@ async function searchNews(query, topK = 5) {
     
     return results.matches || [];
   } catch (error) {
-    console.error('Error searching news:', error);
     throw error;
   }
 }

@@ -11,10 +11,8 @@ async function initialize() {
       baseUrl: config.jina.baseUrl
     };
 
-    console.log(`Jina embeddings service initialized with model: ${jinaConfig.model}`);
     return jinaConfig;
   } catch (error) {
-    console.error('Failed to initialize Jina embeddings service:', error);
     throw error;
   }
 }
@@ -49,14 +47,11 @@ async function getEmbeddings(texts) {
     }
 
     const embeddings = response.data.data.map(item => item.embedding);
-    console.log(`Generated ${embeddings.length} embeddings using Jina`);
     
     return embeddings;
   } catch (error) {
-    console.error('Error getting embeddings from Jina:', error);
     
     if (error.response) {
-      console.error('Jina API Error:', error.response.status, error.response.data);
     }
     
     throw error;
@@ -68,7 +63,6 @@ async function getEmbedding(text) {
     const embeddings = await getEmbeddings([text]);
     return embeddings[0];
   } catch (error) {
-    console.error('Error getting single embedding from Jina:', error);
     throw error;
   }
 }
@@ -79,7 +73,6 @@ async function getBatchEmbeddings(texts, batchSize = 10) {
     
     for (let i = 0; i < texts.length; i += batchSize) {
       const batch = texts.slice(i, i + batchSize);
-      console.log(`Processing batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(texts.length / batchSize)}`);
       
       const batchEmbeddings = await getEmbeddings(batch);
       allEmbeddings.push(...batchEmbeddings);
@@ -92,7 +85,6 @@ async function getBatchEmbeddings(texts, batchSize = 10) {
     
     return allEmbeddings;
   } catch (error) {
-    console.error('Error getting batch embeddings from Jina:', error);
     throw error;
   }
 }
@@ -102,7 +94,6 @@ async function testConnection() {
     const testEmbedding = await getEmbedding('test');
     return testEmbedding && testEmbedding.length > 0;
   } catch (error) {
-    console.error('Jina connection test failed:', error);
     return false;
   }
 }

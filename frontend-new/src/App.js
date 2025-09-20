@@ -85,7 +85,6 @@ const App = () => {
       resetSession();
       // The welcome message will be shown automatically by the useEffect
     } catch (error) {
-      console.error('Failed to reset chat:', error);
     }
   };
 
@@ -129,14 +128,12 @@ const App = () => {
         },
         // onError
         (error) => {
-          console.error('Streaming error:', error);
           setIsStreaming(false);
           setIsTyping(false);
           setStreamingText('');
         }
       );
     } catch (error) {
-      console.error('Error sending message:', error);
       setIsStreaming(false);
       setIsTyping(false);
       setStreamingText('');
@@ -161,7 +158,6 @@ const App = () => {
       // Send a text message instead
       await handleSendMessage();
     } catch (error) {
-      console.error('Error sending voice message:', error);
       clearAudio();
     }
   }, [clearAudio, handleSendMessage]);

@@ -80,29 +80,21 @@ app.use('*', (req, res) => {
 // Initialize services and start server
 async function startServer() {
   try {
-    console.log('🚀 Initializing services...');
     await initializeServices();
-    console.log('✅ Services initialized successfully');
     
     app.listen(PORT, () => {
-      console.log(`🎉 Server running on port ${PORT}`);
-      console.log(`📚 API Documentation: http://localhost:${PORT}/api/docs`);
-      console.log(`🏥 Health Check: http://localhost:${PORT}/api/health`);
     });
   } catch (error) {
-    console.error('❌ Failed to start server:', error);
     process.exit(1);
   }
 }
 
 // Graceful shutdown
 process.on('SIGTERM', () => {
-  console.log('SIGTERM received, shutting down gracefully');
   process.exit(0);
 });
 
 process.on('SIGINT', () => {
-  console.log('SIGINT received, shutting down gracefully');
   process.exit(0);
 });
 

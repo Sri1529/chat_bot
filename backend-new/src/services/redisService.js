@@ -7,7 +7,6 @@ async function initialize() {
   try {
     // Use REDIS_URL if available (production), otherwise use individual config
     if (config.redis.url) {
-      console.log('Connecting to Redis using URL:', config.redis.url.replace(/\/\/.*@/, '//***:***@')); // Hide credentials in logs
       client = createClient({ 
         url: config.redis.url,
         socket: {
@@ -15,7 +14,6 @@ async function initialize() {
         }
       });
     } else {
-      console.log(`Connecting to Redis at ${config.redis.host}:${config.redis.port}`);
       const redisConfig = {
         socket: {
           host: config.redis.host,
@@ -32,26 +30,24 @@ async function initialize() {
     }
 
     client.on('error', (err) => {
-      console.error('Redis Client Error:', err);
+      // Redis client error
     });
 
     client.on('connect', () => {
-      console.log('Redis Client Connected');
+      // Redis client connected
     });
 
     client.on('ready', () => {
-      console.log('Redis Client Ready');
+      // Redis client ready
     });
 
     client.on('end', () => {
-      console.log('Redis Client Disconnected');
+      // Redis client disconnected
     });
 
     await client.connect();
-    console.log('✅ Redis service initialized successfully');
     return client;
   } catch (error) {
-    console.error('❌ Failed to initialize Redis:', error);
     throw error;
   }
 }
@@ -61,7 +57,6 @@ async function getSession(sessionId) {
     const sessionData = await client.get(`session:${sessionId}`);
     return sessionData ? JSON.parse(sessionData) : null;
   } catch (error) {
-    console.error('Error getting session:', error);
     throw error;
   }
 }
@@ -72,7 +67,6 @@ async function setSession(sessionId, sessionData) {
     await client.setEx(key, config.session.ttl, JSON.stringify(sessionData));
     return true;
   } catch (error) {
-    console.error('Error setting session:', error);
     throw error;
   }
 }
@@ -104,7 +98,6 @@ async function addMessageToSession(sessionId, message) {
     await setSession(sessionId, session);
     return session;
   } catch (error) {
-    console.error('Error adding message to session:', error);
     throw error;
   }
 }
@@ -114,7 +107,6 @@ async function clearSession(sessionId) {
     await client.del(`session:${sessionId}`);
     return true;
   } catch (error) {
-    console.error('Error clearing session:', error);
     throw error;
   }
 }
@@ -124,7 +116,6 @@ async function getSessionHistory(sessionId) {
     const session = await getSession(sessionId);
     return session ? session.messages : [];
   } catch (error) {
-    console.error('Error getting session history:', error);
     throw error;
   }
 }

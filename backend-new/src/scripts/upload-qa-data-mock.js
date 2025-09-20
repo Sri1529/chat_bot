@@ -57,18 +57,14 @@ function generateMockEmbedding(text) {
 
 async function uploadQAData() {
   try {
-    console.log('🚀 Starting Q&A data upload to Pinecone...');
     
     // Initialize services first
-    console.log('🔧 Initializing services...');
     await initializeServices();
-    console.log('✅ Services initialized');
     
     // Get services
     const services = getServices();
     
     // Generate mock embeddings for questions
-    console.log('📝 Generating mock embeddings for questions...');
     const questionEmbeddings = qaData.map(item => generateMockEmbedding(item.question));
     
     // Prepare vectors for Pinecone
@@ -83,36 +79,23 @@ async function uploadQAData() {
       }
     }));
     
-    console.log(`📤 Uploading ${vectors.length} Q&A pairs to Pinecone...`);
     
     // Upload to Pinecone
     const result = await services.pinecone.upsertVectors(vectors);
-    console.log('✅ Q&A data uploaded successfully!');
-    console.log('📊 Upload result:', result);
     
     // Verify upload
-    console.log('🔍 Verifying upload...');
     const stats = await services.pinecone.getIndexStats();
-    console.log('📈 Index stats:', stats);
     
     // Test search
-    console.log('🔍 Testing search functionality...');
     const testQuery = "What is AI?";
     const testEmbedding = generateMockEmbedding(testQuery);
     const searchResults = await services.pinecone.queryVectors(testEmbedding, 3);
     
-    console.log('🔍 Search results for "What is AI?":');
     searchResults.matches?.forEach((match, index) => {
-      console.log(`${index + 1}. Question: ${match.metadata.question}`);
-      console.log(`   Answer: ${match.metadata.answer}`);
-      console.log(`   Score: ${match.score}`);
-      console.log('---');
     });
     
-    console.log('🎉 Q&A data upload and testing completed successfully!');
     
   } catch (error) {
-    console.error('❌ Error uploading Q&A data:', error);
     throw error;
   }
 }
@@ -121,11 +104,9 @@ async function uploadQAData() {
 if (require.main === module) {
   uploadQAData()
     .then(() => {
-      console.log('✅ Script completed successfully');
       process.exit(0);
     })
     .catch((error) => {
-      console.error('❌ Script failed:', error);
       process.exit(1);
     });
 }

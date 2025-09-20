@@ -60,7 +60,6 @@ router.get('/', async (req, res) => {
     res.status(statusCode).json(health);
 
   } catch (error) {
-    console.error('Health check failed:', error);
     res.status(503).json({
       status: 'unhealthy',
       timestamp: new Date().toISOString(),

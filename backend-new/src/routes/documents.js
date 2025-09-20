@@ -77,7 +77,6 @@ async function extractTextFromFile(filePath, mimetype) {
     
     return await fs.readFile(filePath, 'utf8');
   } catch (error) {
-    console.error('Error extracting text from file:', error);
     throw error;
   }
 }
@@ -128,7 +127,6 @@ router.post('/upload', upload.single('document'), async (req, res) => {
     const fileSize = req.file.size;
     const mimetype = req.file.mimetype;
 
-    console.log(`📄 Processing document: ${fileName} (${fileSize} bytes)`);
 
     // Extract text from file
     const textContent = await extractTextFromFile(filePath, mimetype);
@@ -157,11 +155,9 @@ router.post('/upload', upload.single('document'), async (req, res) => {
 
     // Chunk the document
     const chunks = chunkText(textContent, 1000, 200);
-    console.log(`📄 Created ${chunks.length} chunks from document`);
 
     // Generate embeddings for chunks
     const embeddings = await services.pineconeEmbeddings.getBatchEmbeddings(chunks);
-    console.log(`🔢 Generated ${embeddings.length} embeddings`);
 
     // Create vectors for Pinecone
     const vectors = chunks.map((chunk, index) => ({
@@ -185,7 +181,6 @@ router.post('/upload', upload.single('document'), async (req, res) => {
     }));
 
     // Upload to Pinecone
-    console.log(`📤 Uploading ${vectors.length} vectors to Pinecone...`);
     await services.pinecone.upsertVectors(vectors);
 
     // Clean up uploaded file
@@ -206,14 +201,12 @@ router.post('/upload', upload.single('document'), async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error processing document:', error);
     
     // Clean up file if it exists
     if (req.file && req.file.path) {
       try {
         await fs.unlink(req.file.path);
       } catch (cleanupError) {
-        console.error('Error cleaning up file:', cleanupError);
       }
     }
 
@@ -235,7 +228,6 @@ router.post('/text', [
     const { title, content, category = 'general' } = req.body;
     const services = getServices();
 
-    console.log(`📝 Processing text document: ${title}`);
 
     if (content.trim().length < 100) {
       return res.status(400).json({
@@ -256,11 +248,9 @@ router.post('/text', [
 
     // Chunk the content
     const chunks = chunkText(content, 1000, 200);
-    console.log(`📝 Created ${chunks.length} chunks from text`);
 
     // Generate embeddings for chunks
     const embeddings = await services.pineconeEmbeddings.getBatchEmbeddings(chunks);
-    console.log(`🔢 Generated ${embeddings.length} embeddings`);
 
     // Create vectors for Pinecone
     const vectors = chunks.map((chunk, index) => ({
@@ -281,7 +271,6 @@ router.post('/text', [
     }));
 
     // Upload to Pinecone
-    console.log(`📤 Uploading ${vectors.length} vectors to Pinecone...`);
     await services.pinecone.upsertVectors(vectors);
 
     res.json({
@@ -298,7 +287,6 @@ router.post('/text', [
     });
 
   } catch (error) {
-    console.error('Error processing text document:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to process text document',
@@ -320,7 +308,6 @@ router.get('/search', async (req, res) => {
     }
 
     const services = getServices();
-    console.log(`🔍 Searching documents for: "${searchQuery}"`);
 
     // Generate query embedding
     const queryEmbedding = await services.pineconeEmbeddings.getEmbedding(searchQuery);
@@ -362,7 +349,6 @@ router.get('/search', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error searching documents:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to search documents',
@@ -388,7 +374,6 @@ router.get('/stats', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error getting document stats:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to get document statistics',

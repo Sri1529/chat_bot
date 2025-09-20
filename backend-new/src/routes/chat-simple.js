@@ -34,7 +34,6 @@ router.post('/', [
     // Generate session ID if not provided
     const currentSessionId = sessionId || uuidv4();
     
-    console.log(`Processing chat message for session: ${currentSessionId}`);
     
     // Add user message to session
     const userMessage = {
@@ -54,7 +53,6 @@ router.post('/', [
     try {
       response = await services.gemini.generateResponse(message, '');
     } catch (error) {
-      console.error('Gemini error:', error);
       response = "I'm sorry, I'm having trouble connecting to the AI service right now. Please try again later.";
     }
     
@@ -79,7 +77,6 @@ router.post('/', [
     });
     
   } catch (error) {
-    console.error('Error processing chat message:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to process chat message',
@@ -107,7 +104,6 @@ router.get('/history/:sessionId', [
     });
     
   } catch (error) {
-    console.error('Error getting chat history:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to get chat history',
@@ -132,7 +128,6 @@ router.delete('/reset/:sessionId', [
     });
     
   } catch (error) {
-    console.error('Error clearing chat history:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to clear chat history',

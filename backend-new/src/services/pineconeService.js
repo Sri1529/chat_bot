@@ -15,16 +15,13 @@ async function initialize() {
     const indexes = await pinecone.listIndexes();
     
     if (!indexes.indexes?.find(idx => idx.name === indexName)) {
-      console.log(`Pinecone index '${indexName}' not found. Skipping creation for demo purposes.`);
-      console.log('Note: You can create the index manually in the Pinecone console.');
+      // Pinecone index not found, skipping creation for demo purposes
     }
 
     index = pinecone.index(indexName);
-    console.log(`Pinecone index '${indexName}' is ready`);
     
     return index;
   } catch (error) {
-    console.error('Failed to initialize Pinecone:', error);
     throw error;
   }
 }
@@ -36,10 +33,8 @@ async function upsertVectors(vectors) {
     }
 
     const response = await index.upsert(vectors);
-    console.log(`Upserted ${vectors.length} vectors to Pinecone`);
     return response;
   } catch (error) {
-    console.error('Error upserting vectors to Pinecone:', error);
     throw error;
   }
 }
@@ -62,10 +57,8 @@ async function queryVectors(queryVector, topK = 5, filter = {}) {
     }
 
     const response = await index.query(queryRequest);
-    console.log(`Queried Pinecone and found ${response.matches?.length || 0} matches`);
     return response;
   } catch (error) {
-    console.error('Error querying Pinecone:', error);
     throw error;
   }
 }
@@ -77,10 +70,8 @@ async function deleteVectors(ids) {
     }
 
     const response = await index.deleteMany(ids);
-    console.log(`Deleted ${ids.length} vectors from Pinecone`);
     return response;
   } catch (error) {
-    console.error('Error deleting vectors from Pinecone:', error);
     throw error;
   }
 }
@@ -94,7 +85,6 @@ async function getIndexStats() {
     const stats = await index.describeIndexStats();
     return stats;
   } catch (error) {
-    console.error('Error getting Pinecone index stats:', error);
     throw error;
   }
 }

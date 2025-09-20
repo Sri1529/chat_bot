@@ -32,7 +32,6 @@ router.post('/', [
     // Generate session ID if not provided
     const currentSessionId = sessionId || uuidv4();
     
-    console.log(`Processing chat message for session: ${currentSessionId}`);
     
     // Add user message to session
     const userMessage = {
@@ -90,7 +89,6 @@ router.post('/', [
     });
     
   } catch (error) {
-    console.error('Error processing chat message:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to process chat message',
@@ -119,7 +117,6 @@ router.get('/history/:sessionId', [
     });
     
   } catch (error) {
-    console.error('Error getting chat history:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to get chat history',
@@ -147,7 +144,6 @@ router.delete('/reset/:sessionId', [
     });
     
   } catch (error) {
-    console.error('Error clearing chat history:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to clear chat history',
@@ -244,7 +240,6 @@ router.post('/stream', [
     res.end();
     
   } catch (error) {
-    console.error('Error processing streaming chat:', error);
     res.write(`data: ${JSON.stringify({ type: 'error', message: error.message })}\n\n`);
     res.end();
   }

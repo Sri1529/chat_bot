@@ -124,7 +124,7 @@ const App = () => {
       setIsTyping(false);
       setStreamingText('');
     }
-  }, [inputText, isProcessing, sendStreamingMessage, streamingText]);
+  }, [inputText, isProcessing, sendStreamingMessage]);
 
 
   return (
